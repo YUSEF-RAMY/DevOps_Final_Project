@@ -18,8 +18,8 @@ class CategorySeeder extends Seeder
             ['name' => 'خضار', 'description' => 'اجود انواع الخضار', 'imagepath' => 'assets/img/category/خضار.jpeg'],
             ['name' => 'ورد', 'description' => 'اجود العطور', 'imagepath' => 'assets/img/category/flawer.jpeg'],
             ['name' => 'فواكه', 'description' => 'الفواكه سر السعاده', 'imagepath' => 'assets/img/category/fruits.jpeg'],
-            ['name' => 'الماكولات', 'description' => 'الجملي هو املي', 'imagepath' => 'assets/img/category/اكل.jpeg'],
-            ['name' => 'مستحضارات التجميل', 'description' => 'عندنا نقاشين لوش حضرتك', 'imagepath' => 'assets/img/category/makeup.jpeg'],
+            ['name' => 'الماكولات', 'description' => 'اجود الماكولات', 'imagepath' => 'assets/img/category/اكل.jpeg'],
+            ['name' => 'مستحضارات التجميل', 'description' => 'احدث الاجهزة التجميلية', 'imagepath' => 'assets/img/category/makeup.jpeg'],
         ]);
     }
 }
