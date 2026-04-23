@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Documentation - eCommerceLaravel</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; margin: 24px; color: #111; }
+    h1 { margin-top: 0; }
+    h2 { margin-top: 32px; }
+    h3 { margin-top: 24px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95em; }
+    pre { background: #f6f8fa; padding: 12px; border-radius: 8px; overflow: auto; border: 1px solid #eee; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; border: 1px solid #ddd; background: #fff; }
+    .get { color: #0a6; border-color: #0a6; }
+    .post { color: #06c; border-color: #06c; }
+    .put { color: #a60; border-color: #a60; }
+    .del { color: #c00; border-color: #c00; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #fafafa; }
+    .small { color: #555; font-size: 0.92em; }
+    .note { background: #fffbe6; border: 1px solid #ffec99; padding: 10px; border-radius: 8px; }
+  </style>
+  <!-- Public Mobile API under /api/* | Auth: Laravel Sanctum Bearer token -->
+  <!-- Last updated: 2026-01-30 -->
+</head>
+<body>
+  <h1>eCommerce Laravel API Documentation</h1>
+  <p class="small">Base URL: <code>https://ecommerce_laravel.test/api</code> (replace with your app URL)</p>
+
+  <div class="note">
+    <strong>Overview</strong>
+    <ul>
+      <li>Authentication: Laravel Sanctum via <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+      <li>Content Type: <code>application/json</code> for requests and responses (unless otherwise noted).</li>
+      <li>Currency: All monetary fields return both <code>amount</code> (number) and <code>formatted</code> (string) using the current website currency.</li>
+      <li>Guest Cart: Provide/receive <code>X-Cart-Session</code> (UUID). If missing, API returns a new session id you should persist on the client.</li>
+      <li>Pagination: Paged endpoints include a <code>meta</code> object with <code>current_page, last_page, per_page, total</code>. Use <code>page</code> and optional <code>per_page</code> (default 20, max 100).</li>
+    </ul>
+  </div>
+
+  <h2>Authentication</h2>
+
+  <h3><span class="tag post">POST</span> /register</h3>
+  <p>Create a new user and return a token.</p>
+  <table>
+    <tr><th>Body</th><td><code>name</code> (string, required), <code>email</code> (string, unique) OR <code>phone</code> (string, unique), <code>password</code> (string, min 8)</td></tr>
+  </table>
+  <pre>{
+  "token": "...",
+  "user": {"id": 1, "name": "John", "email": "john@example.com", "phone": null}
+}</pre>
+
+  <h3><span class="tag post">POST</span> /login</h3>
+  <p>Log in with email or phone and password.</p>
+  <table>
+    <tr><th>Body</th><td><code>login</code> (email or phone), <code>password</code> (string)</td></tr>
+  </table>
+  <pre>{
+  "token": "...",
+  "user": {"id": 1, "name": "John", "email": "john@example.com", "phone": null}
+}</pre>
+
+  <h3><span class="tag post">POST</span> /logout</h3>
+  <p>Invalidate current token.</p>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+  </table>
+  <pre>{"success": true}</pre>
+
+  <h3><span class="tag get">GET</span> /user</h3>
+  <p>Get current user profile.</p>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+  </table>
+
+  <h3><span class="tag put">PUT</span> /user</h3>
+  <p>Update user profile (must have at least one of email or phone).</p>
+  <table>
+    <tr><th>Body</th><td><code>name</code> (required), <code>email</code> (unique), <code>phone</code> (unique)</td></tr>
+  </table>
+
+  <h3><span class="tag put">PUT</span> /user/password</h3>
+  <p>Change password.</p>
+  <table>
+    <tr><th>Body</th><td><code>current_password</code> (string), <code>password</code> (string), <code>password_confirmation</code> (string)</td></tr>
+  </table>
+
+  <h2>Products</h2>
+  <h3><span class="tag get">GET</span> /products</h3>
+  <p>List active products.</p>
+  <table>
+    <tr><th>Query</th><td><code>q</code> (string), <code>category_id</code> (int), <code>page</code> (int), <code>per_page</code> (int, default 20, max 100)</td></tr>
+  </table>
+  <pre>{
+  "data": [{
+    "id": 10,
+    "name": "Product A",
+    "slug": "product-a",
+    "sku": "SKU-A",
+    "short_description": "...",
+    "stock": 12,
+    "category": {
+      "id": 2,
+      "name": "Cat",
+      "slug": "cat",
+      "is_parent": false,
+      "parent": {"id": 1, "name": "Parent Category", "slug": "parent-category"}
+    },
+    "images": [{"id": 1, "path": "/storage/...", "is_primary": true}],
+    "price": {"amount": 99.9, "formatted": "$99.90"},
+    "compare_at_price": null,
+    "currency": {"code": "USD", "symbol": "$"}
+  }],
+  "meta": {"current_page": 1, "last_page": 5, "per_page": 20, "total": 100}
+}</pre>
+
+  <h3><span class="tag get">GET</span> /products/{slug}</h3>
+  <p>Get single product (active only).</p>
+
+  <h2>Categories</h2>
+  <h3><span class="tag get">GET</span> /categories</h3>
+  <p>List active categories.</p>
+  <table>
+    <tr><th>Query</th><td><code>page</code> (int), <code>per_page</code> (int, default 20, max 100), <code>parent_only</code> (bool), <code>subcategories_only</code> (bool)</td></tr>
+  </table>
+  <pre>{
+  "data": [{
+    "id": 1,
+    "name": "Shoes",
+    "slug": "shoes",
+    "description": "...",
+    "is_parent": true,
+    "parent": null
+  }, {
+    "id": 2,
+    "name": "Running Shoes",
+    "slug": "running-shoes",
+    "description": "...",
+    "is_parent": false,
+    "parent": {"id": 1, "name": "Shoes", "slug": "shoes"}
+  }],
+  "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 2}
+}</pre>
+  <h3><span class="tag get">GET</span> /categories/{slug}</h3>
+  <p>Get category details with subcategories (if parent).</p>
+  <pre>{
+  "id": 1,
+  "name": "Shoes",
+  "slug": "shoes",
+  "description": "...",
+  "is_parent": true,
+  "parent": null,
+  "subcategories": [
+    {"id": 2, "name": "Running Shoes", "slug": "running-shoes"},
+    {"id": 3, "name": "Casual Shoes", "slug": "casual-shoes"}
+  ]
+}</pre>
+
+  <h2>Cart</h2>
+  <p>For guests use <code>X-Cart-Session</code> header. If not provided, responses include <code>cart_session</code> you should persist for subsequent requests.</p>
+
+  <h3><span class="tag get">GET</span> /cart</h3>
+  <table>
+    <tr><th>Headers (guest)</th><td><code>X-Cart-Session: &lt;uuid&gt;</code> (optional)</td></tr>
+    <tr><th>Headers (auth)</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+  </table>
+  <pre>{
+  "cart_session": "c8c4..." ,
+  "items": [{
+    "id": 1,
+    "product": {"id": 10, "name": "Product A", "slug": "product-a", "sku": "SKU-A"},
+    "quantity": 2,
+    "unit_price": {"amount": 50, "formatted": "$50.00"},
+    "line_total": {"amount": 100, "formatted": "$100.00"}
+  }],
+  "totals": {
+    "subtotal": {"amount": 100, "formatted": "$100.00"},
+    "discount_total": {"amount": 0, "formatted": "$0.00"},
+    "tax_total": {"amount": 0, "formatted": "$0.00"},
+    "grand_total": {"amount": 100, "formatted": "$100.00"}
+  }
+}</pre>
+
+  <h3><span class="tag post">POST</span> /cart/add</h3>
+  <table>
+    <tr><th>Body</th><td><code>product_id</code> (int, required), <code>quantity</code> (int, default 1)</td></tr>
+  </table>
+
+  <h3><span class="tag put">PUT</span> /cart/items/{item}</h3>
+  <table>
+    <tr><th>Body</th><td><code>quantity</code> (int &ge; 1)</td></tr>
+  </table>
+
+  <h3><span class="tag del">DELETE</span> /cart/items/{item}</h3>
+
+  <h3><span class="tag post">POST</span> /cart/clear</h3>
+
+  <h2>Wishlist</h2>
+  <p>The wishlist feature can be enabled/disabled in admin Site Settings. Guests can toggle wishlist items using an API session header similar to cart.</p>
+
+  <h3><span class="tag get">GET</span> /wishlist</h3>
+  <p>List current user's wishlist items (auth only).</p>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+  </table>
+  <pre>{
+  "items": [{
+    "product": {"id": 10, "name": "Product A", "slug": "product-a", "sku": "SKU-A"}
+  }],
+  "count": 1
+}</pre>
+
+  <h3><span class="tag post">POST</span> /wishlist/toggle</h3>
+  <p>Add/remove a product from wishlist. Works for guests or authenticated users.</p>
+  <table>
+    <tr><th>Headers (guest)</th><td><code>X-Wishlist-Session: &lt;uuid&gt;</code> (optional)</td></tr>
+    <tr><th>Headers (auth)</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><th>Body</th><td><code>product_id</code> (int, required)</td></tr>
+  </table>
+  <pre>{
+  "success": true,
+  "state": "added", // or "removed"
+  "count": 3,
+  "wishlist_session": "0c5a..." // present if API created a new guest session
+}</pre>
+
+  <h2>Coupons</h2>
+  <h3><span class="tag post">POST</span> /coupons/validate</h3>
+  <table>
+    <tr><th>Body</th><td><code>code</code> (string)</td></tr>
+  </table>
+  <h3><span class="tag post">POST</span> /coupons/apply</h3>
+  <h3><span class="tag post">POST</span> /coupons/remove</h3>
+
+  <h2>Orders</h2>
+  <h3><span class="tag get">GET</span> /orders</h3>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><th>Query</th><td><code>page</code> (int), <code>per_page</code> (int, default 20, max 100)</td></tr>
+  </table>
+  <pre>{
+  "data": [{
+    "id": 4,
+    "number": "ORD-XXXX",
+    "status": "pending",
+    "grand_total": {"amount": 135, "formatted": "$135.00"},
+    "created_at": "2025-11-03T10:00:00Z"
+  }],
+  "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 1}
+}</pre>
+
+  <h3><span class="tag get">GET</span> /orders/{id}</h3>
+
+  <h3><span class="tag post">POST</span> /checkout</h3>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><th>Body</th><td>
+      <code>billing_name</code> (required), <code>billing_email</code> (required), <code>billing_phone</code> (required),
+      <code>billing_division</code>, <code>billing_district</code>, <code>billing_upazila</code>, <code>billing_address</code>, <code>billing_postcode</code>, <code>billing_country</code>,
+      <code>shipping_name</code>, <code>shipping_phone</code>, <code>shipping_division</code>, <code>shipping_district</code>, <code>shipping_upazila</code>, <code>shipping_address</code>, <code>shipping_postcode</code>, <code>shipping_country</code>,
+      <code>gateway</code> (required, one of: <code>bkash</code>, <code>nagad</code>, <code>rocket</code>, <code>ssl_commerce</code>, <code>stripe</code>, <code>paypal</code>, <code>cod</code>)
+    </td></tr>
+  </table>
+
+  <h2>Addresses</h2>
+  <h3><span class="tag get">GET</span> /user/addresses</h3>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><th>Query</th><td><code>page</code> (int), <code>per_page</code> (int, default 20, max 100)</td></tr>
+  </table>
+  <pre>{
+  "data": [{
+    "id": 12,
+    "type": "shipping",
+    "first_name": "John",
+    "last_name": "Doe",
+    "address_line_1": "123 Main St",
+    "address_line_2": null,
+    "city": "City",
+    "state": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "upazila": "Dhanmondi",
+    "postal_code": "1209",
+    "country": "Bangladesh",
+    "phone": "+8801712345678",
+    "is_default": true,
+    "created_at": "2025-11-03T10:00:00Z"
+  }],
+  "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 1}
+}</pre>
+  <h3><span class="tag post">POST</span> /user/addresses</h3>
+  <table>
+    <tr><th>Body</th><td>
+      <code>type</code> (billing|shipping, required), <code>first_name</code> (required), <code>last_name</code> (required), <code>company</code>,
+      <code>address_line_1</code> (required), <code>address_line_2</code>, <code>city</code>, <code>state</code>, <code>division</code>, <code>district</code>, <code>upazila</code>, <code>postal_code</code>, <code>country</code> (required), <code>phone</code>, <code>is_default</code> (bool)
+    </td></tr>
+  </table>
+  <h3><span class="tag put">PUT</span> /user/addresses/{address}</h3>
+  <h3><span class="tag del">DELETE</span> /user/addresses/{address}</h3>
+  <h3><span class="tag post">POST</span> /user/addresses/{address}/set-default</h3>
+
+  <h2>Common Headers</h2>
+  <table>
+    <tr><th>Header</th><th>Description</th></tr>
+    <tr><td><code>Authorization</code></td><td><code>Bearer &lt;token&gt;</code> (for authenticated endpoints)</td></tr>
+    <tr><td><code>Content-Type</code></td><td><code>application/json</code> (for JSON requests)</td></tr>
+    <tr><td><code>X-Cart-Session</code></td><td>Guest cart session UUID (when not using auth)</td></tr>
+    <tr><td><code>X-Wishlist-Session</code></td><td>Guest wishlist session UUID (when not using auth)</td></tr>
+  </table>
+
+  <h2>Errors</h2>
+  <ul>
+    <li><strong>401 Unauthorized</strong>: Missing/invalid token for protected endpoints.</li>
+    <li><strong>422 Unprocessable Entity</strong>: Validation or business rule failures (e.g., out of stock, invalid coupon).</li>
+    <li><strong>404 Not Found</strong>: Resource not found (e.g., product slug invalid).</li>
+    <li><strong>500 Internal Server Error</strong>: Unexpected error.</li>
+  </ul>
+
+  <h2>Admin Panel (Web)</h2>
+  <p>The admin panel is web-based at <code>/admin</code> and is not part of this API. Key features:</p>
+  <ul>
+    <li><strong>Dashboard</strong> – Overview and quick links.</li>
+    <li><strong>Categories, Products, Orders, Users</strong> – CRUD and management.</li>
+    <li><strong>Media Library</strong> – Upload images/files; shortcode <code>[media:id]</code> for content.</li>
+    <li><strong>Site Settings</strong> – General, Features, SEO, Theme, Tracking; tab state is preserved on save.</li>
+    <li><strong>Error Logs</strong> – Central error log (stats, severity, resolved/unresolved, bulk actions).</li>
+    <li><strong>Clear cache</strong> – Header link (admin only) clears application/config/view/route/optimize caches; result shown in SweetAlert2.</li>
+    <li><strong>Roles & Permissions</strong> – Route-based permissions for admin users.</li>
+  </ul>
+  <p class="small">Admin auth: session-based login at <code>/admin/login</code>. Clear cache: <code>POST /admin/clear-cache</code> (auth required, returns JSON with <code>success</code>, <code>results</code>, <code>summary</code>).</p>
+
+  <h2>cURL Examples</h2>
+  <h3>Login</h3>
+  <pre>curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"login":"john@example.com","password":"secret123"}' \
+  https://ecommerce_laravel.test/api/login</pre>
+
+  <h3>List Products</h3>
+  <pre>curl https://ecommerce_laravel.test/api/products?q=shoe&page=1</pre>
+
+  <h3>Guest Add to Cart</h3>
+  <pre>curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "X-Cart-Session: 2f7a5b6c-3f1a-4f2d-a0e8-8b4e0c123456" \
+  -d '{"product_id":10,"quantity":2}' \
+  https://ecommerce_laravel.test/api/cart/add</pre>
+
+  <h3>Place Order (Auth)</h3>
+  <pre>curl -X POST \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "billing_name": "John Doe",
+    "billing_email": "john@example.com",
+    "billing_phone": "+8801712345678",
+    "billing_division": "Dhaka",
+    "billing_district": "Dhaka",
+    "billing_upazila": "Dhanmondi",
+    "billing_address": "123 Main Street",
+    "billing_postcode": "1209",
+    "billing_country": "Bangladesh",
+    "gateway": "cod"
+  }' \
+  https://ecommerce_laravel.test/api/checkout</pre>
+
+  <p class="small">Note: Responses shown here are illustrative. Actual values depend on your data and configuration.</p>
+</body>
+</html>
+
+
