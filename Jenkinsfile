@@ -45,11 +45,15 @@ pipeline {
                    ملحوظة هامة: لازم تضيفي الـ Credentials في جينكنز باسم 'docker-hub-creds'
                    عشان السطر اللي جاي يشتغل بأمان.
                 */
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+
+                  withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
                     sh "docker push ${DOCKER_HUB_USER}/${APP_NAME}:${IMAGE_TAG}"
                     sh "docker push ${DOCKER_HUB_USER}/${APP_NAME}:latest"
+                  }
                 }
+
             }
         }
 
