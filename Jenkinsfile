@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo 'Validating Kubernetes YAML files...'
                 // بيتأكد إن ملفات الـ YAML اللي في فولدر k8s (زي app-deployment و mysql-setup) سليمة
-                sh "kubectl apply --dry-run=server -f k8s/ --validate=false || echo 'Local validation passed'"
+                sh "kubectl apply -f k8s/"
             }
         }
 
@@ -45,23 +45,24 @@ pipeline {
                    ملحوظة هامة: لازم تضيفي الـ Credentials في جينكنز باسم 'docker-hub-creds'
                    عشان السطر اللي جاي يشتغل بأمان.
                 */
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                
 
                   withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
                     sh "docker push ${DOCKER_HUB_USER}/${APP_NAME}:${IMAGE_TAG}"
                     sh "docker push ${DOCKER_HUB_USER}/${APP_NAME}:latest"
                   }
-                }
+                
 
             }
         }
 
         stage('K8s Deployment') {
             steps {
-                echo 'Deploying to Kubernetes Cluster...'
+                echo 'Deploying to Local Minikube Cluster...'
                 // تحديث الـ Deployment بملفات الـ YAML اللي مدموجة عندك
-                sh "kubectl apply -f k8s/ --validate=false || echo 'Deployment simulation done'"
+                sh "kubectl apply -f k8s/"
+                sh "kubectl get pods"
             }
         }
     }
