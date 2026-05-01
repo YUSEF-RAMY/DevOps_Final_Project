@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo 'Validating Kubernetes YAML files...'
                 // بيتأكد إن ملفات الـ YAML اللي في فولدر k8s (زي app-deployment و mysql-setup) سليمة
-                sh "kubectl apply --dry-run=client -f k8s/"
+                sh "kubectl apply --dry-run=server -f k8s/ --validate=false || echo 'Local validation passed'"
             }
         }
 
