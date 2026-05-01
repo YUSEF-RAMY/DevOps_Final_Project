@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // اسم المستخدم الخاص بيكِ على Docker Hub
-        DOCKER_HUB_USER = 'rawanfawzy' 
+        DOCKER_HUB_USER = 'rawanfawzy05'
         // اسم المشروع (تقدري تغيريه لو حابه اسم تاني للصورة)
         APP_NAME        = 'devops-final-project'
         // تعريف رقم الـ Build كـ Tag للصورة لضمان عدم التكرار
