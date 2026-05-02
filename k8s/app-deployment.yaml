@@ -15,13 +15,11 @@ spec:
     spec:
       containers:
       - name: php-app
-        image: depi-devops-app:latest
+        image: rawanfawzy05/devops-final-project:latest
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh", "-c"]
         args:
-          - |
-            cp -r /var/www/html/. /shared-data/
-            php-fpm
+          - "cp -r /var/www/html/. /shared-data/ && php-fpm"
         resources:
           requests:
             cpu: "100m"
