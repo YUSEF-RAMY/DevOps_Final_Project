@@ -1,0 +1,54 @@
+# Version control
+.git
+.gitattributes
+.gitignore
+
+# Dependencies (rebuilt inside container)
+node_modules
+vendor
+
+# Environment (injected at runtime)
+.env
+.env.backup
+.env.production
+
+# IDE / Editor
+.fleet
+.idea
+.nova
+.phpunit.cache
+.vscode
+.zed
+.editorconfig
+.phpactor.json
+.phpunit.result.cache
+
+# Build artifacts (rebuilt in container)
+public/build
+public/hot
+public/storage
+
+# Large files not needed in image
+ecommerce.sql
+documentation
+.agent
+scripts/
+.claude
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Laravel storage logs/cache (recreated at runtime)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
+!storage/logs/.gitignore
+!storage/framework/.gitignore
+!storage/app/.gitignore
+
+# Tests (not needed in production image)
+tests
+phpunit.xml
