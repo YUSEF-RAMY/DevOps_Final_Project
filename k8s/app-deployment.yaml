@@ -5,6 +5,15 @@ metadata:
   namespace: depi-production
 spec:
   replicas: 10
+  # ============================================================
+  # Task 8: Automated Rollback & Zero-Downtime Strategy
+  # ============================================================
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2         # Create 2 extra pods during update to maintain capacity
+      maxUnavailable: 0   # Ensure all pods are running before killing old ones
+  # ============================================================
   selector:
     matchLabels:
       app: laravel-ecommerce
@@ -57,6 +66,18 @@ spec:
             port: 80
           initialDelaySeconds: 45
           periodSeconds: 15
+        # ============================================================
+        # Task 8: Readiness Probe for Health Monitoring
+        # This triggers an automatic rollback if the new version fails
+        # ============================================================
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        # ============================================================
         volumeMounts:
         - name: nginx-conf
           mountPath: /etc/nginx/conf.d
