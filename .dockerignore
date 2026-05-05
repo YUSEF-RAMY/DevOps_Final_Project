@@ -31,6 +31,9 @@ public/storage
 # Large files not needed in image
 ecommerce.sql
 documentation
+.agent
+scripts/
+.claude
 
 # OS junk
 .DS_Store
