@@ -56,15 +56,6 @@
 
 ---
 
-## 📐 DEPI DevOps Infrastructure & Architecture Roadmap
-
-<div align="center">
-  <img src="./assets/depi-infographic.png" alt="DEPI Pure Rose DevOps Architecture Roadmap" width="100%" />
-  <p><i>Figure 1.0: End-to-End Automated DevOps Pipeline & Cloud Infrastructure Architecture for PURE ROSE Platform.</i></p>
-</div>
-
----
-
 ## 💻 About The Project
 
 **PURE ROSE** is an enterprise-grade luxury e-commerce platform built on Laravel, designed with high availability at its core. To survive critical seasonal traffic spikes and ensure continuous service, we deployed a highly resilient cloud infrastructure on AWS. 
